@@ -52,7 +52,7 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDi
 
 
   return (
-    <Card className="sticky top-24 shadow-lg">
+    <Card className="shadow-lg">
       <CardHeader>
         <CardTitle>Your QR Code</CardTitle>
       </CardHeader>

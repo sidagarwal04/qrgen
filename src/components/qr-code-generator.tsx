@@ -474,9 +474,11 @@ END:VCARD`;
                     ))}
                 </Tabs>
             </div>
-            <div className="lg:col-span-1 space-y-8">
+            <div className="lg:col-span-1">
+              <div className="lg:sticky lg:top-24 space-y-8">
                 <QrCodeDisplay value={qrValue} {...customization} />
                 <QrCustomization onChange={handleCustomizationChange} currentColors={{primary: customization.primaryColor, background: customization.backgroundColor}} />
+              </div>
             </div>
         </div>
     </div>
