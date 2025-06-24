@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, QrCode } from 'lucide-react';
 
 interface QrCodeDisplayProps {
   value: string;
@@ -57,25 +57,34 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDi
         <CardTitle>Your QR Code</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-6">
-        <div
-          ref={qrCodeRef}
-          className="p-4 rounded-lg transition-all duration-300"
-          style={{ backgroundColor }}
-        >
-          <QRCode
-            value={value}
-            bgColor={backgroundColor}
-            fgColor={primaryColor}
-            size={256}
-            level="H"
-            viewBox={`0 0 256 256`}
-          />
-        </div>
+        {value ? (
+          <div
+            ref={qrCodeRef}
+            className="p-4 rounded-lg transition-all duration-300"
+            style={{ backgroundColor }}
+          >
+            <QRCode
+              value={value}
+              bgColor={backgroundColor}
+              fgColor={primaryColor}
+              size={256}
+              level="H"
+              viewBox={`0 0 256 256`}
+            />
+          </div>
+        ) : (
+          <div className="p-4 rounded-lg bg-muted flex items-center justify-center w-[288px] h-[288px]">
+            <div className="text-center text-muted-foreground">
+                <QrCode className="h-16 w-16 mx-auto mb-4" /> 
+                <p>Your QR code will appear here</p>
+            </div>
+          </div>
+        )}
         <div className="flex gap-2 w-full">
-          <Button className="flex-1" onClick={() => downloadAs('png')}>
+          <Button className="flex-1" onClick={() => downloadAs('png')} disabled={!value}>
             <Download className="mr-2 h-4 w-4" /> PNG
           </Button>
-          <Button className="flex-1" variant="outline" onClick={() => downloadAs('svg')}>
+          <Button className="flex-1" variant="outline" onClick={() => downloadAs('svg')} disabled={!value}>
             <Download className="mr-2 h-4 w-4" /> SVG
           </Button>
         </div>
