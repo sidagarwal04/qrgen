@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -61,7 +60,8 @@ const vCardSchema = z.object({
 });
 
 const fileSchema = z.object({
-  file: z.any().refine(files => files?.length > 0, 'File is required.'),
+  file: (typeof window === 'undefined' ? z.any() : z.instanceof(FileList))
+    .refine((files) => files?.length > 0, 'File is required.'),
 });
 
 type QrType = 'url' | 'text' | 'wifi' | 'vcard' | 'file';
@@ -70,7 +70,7 @@ export function QrCodeGenerator() {
   const [qrType, setQrType] = useState<QrType>('url');
   const [qrValue, setQrValue] = useState('https://qrfy.com/');
   const [customization, setCustomization] = useState({
-    primaryColor: '#800080',
+    primaryColor: '#1F9481',
     backgroundColor: '#ffffff',
   });
 
@@ -81,20 +81,19 @@ export function QrCodeGenerator() {
   const UrlForm = () => {
     const form = useForm<z.infer<typeof urlSchema>>({
       resolver: zodResolver(urlSchema),
-      defaultValues: { url: qrValue },
+      defaultValues: { url: 'https://qrfy.com/' },
       mode: 'onBlur'
     });
     
-    form.watch((value) => {
-        const { success } = urlSchema.safeParse(value);
-        if (success && value.url) {
-            setQrValue(value.url);
-        }
-    });
+    function onSubmit(data: z.infer<typeof urlSchema>) {
+      if (data.url) {
+        setQrValue(data.url);
+      }
+    }
 
     return (
       <Form {...form}>
-        <form className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="url"
@@ -108,6 +107,7 @@ export function QrCodeGenerator() {
               </FormItem>
             )}
           />
+          <Button type="submit" className="w-full">Generate QR Code</Button>
         </form>
       </Form>
     );
@@ -119,16 +119,15 @@ export function QrCodeGenerator() {
       defaultValues: { text: '' },
     });
 
-    form.watch((value) => {
-        const { success } = textSchema.safeParse(value);
-        if(success && value.text) {
-            setQrValue(value.text);
+    function onSubmit(data: z.infer<typeof textSchema>) {
+        if(data.text) {
+            setQrValue(data.text);
         }
-    });
+    }
 
     return (
       <Form {...form}>
-        <form className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="text"
@@ -142,6 +141,7 @@ export function QrCodeGenerator() {
               </FormItem>
             )}
           />
+          <Button type="submit" className="w-full">Generate QR Code</Button>
         </form>
       </Form>
     );
@@ -153,19 +153,16 @@ export function QrCodeGenerator() {
       defaultValues: { ssid: '', password: '', encryption: 'WPA' },
     });
 
-    form.watch((values) => {
-        const { success } = wifiSchema.safeParse(values);
-        if (success) {
-            const { ssid, password, encryption } = values;
-            if (ssid) {
-                setQrValue(`WIFI:S:${ssid};T:${encryption};P:${password};;`);
-            }
+    function onSubmit(values: z.infer<typeof wifiSchema>) {
+        const { ssid, password, encryption } = values;
+        if (ssid) {
+            setQrValue(`WIFI:S:${ssid};T:${encryption};P:${password};;`);
         }
-    });
+    }
 
     return (
       <Form {...form}>
-        <form className="grid sm:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="ssid"
@@ -214,6 +211,9 @@ export function QrCodeGenerator() {
               </FormItem>
             )}
           />
+          <div className="sm:col-span-2 pt-2">
+            <Button type="submit" className="w-full">Generate QR Code</Button>
+          </div>
         </form>
       </Form>
     );
@@ -225,12 +225,10 @@ export function QrCodeGenerator() {
       defaultValues: { firstName: '', lastName: '', phone: '', email: '', website: '', organization: '' },
     });
 
-    form.watch((values) => {
-        const { success } = vCardSchema.safeParse(values);
-        if (success) {
-            const { firstName, lastName, phone, email, website, organization } = values;
-            if (firstName) {
-                const vCard = `BEGIN:VCARD
+    function onSubmit(values: z.infer<typeof vCardSchema>) {
+        const { firstName, lastName, phone, email, website, organization } = values;
+        if (firstName) {
+            const vCard = `BEGIN:VCARD
 VERSION:4.0
 N:${lastName};${firstName};;;
 FN:${firstName} ${lastName}
@@ -239,20 +237,22 @@ TEL;TYPE=work,voice:${phone}
 EMAIL:${email}
 URL:${website}
 END:VCARD`;
-                setQrValue(vCard);
-            }
+            setQrValue(vCard);
         }
-    });
+    }
 
     return (
       <Form {...form}>
-        <form className="grid sm:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4">
           <FormField control={form.control} name="firstName" render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="lastName" render={({ field }) => (<FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="organization" render={({ field }) => (<FormItem><FormLabel>Organization</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="website" render={({ field }) => (<FormItem><FormLabel>Website</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem>)} />
+          <div className="sm:col-span-2 pt-2">
+             <Button type="submit" className="w-full">Generate QR Code</Button>
+          </div>
         </form>
       </Form>
     );
@@ -263,24 +263,24 @@ END:VCARD`;
       resolver: zodResolver(fileSchema),
     });
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        setQrValue(`Your file "${file.name}" would be available for download here. This requires a backend for file storage.`);
-      }
-    };
+    function onSubmit(data: z.infer<typeof fileSchema>) {
+        const file = data.file?.[0];
+        if (file) {
+            setQrValue(`Your file "${file.name}" would be available for download here. This requires a backend for file storage.`);
+        }
+    }
 
     return (
       <Form {...form}>
-        <form className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="file"
-            render={({ field }) => (
+            render={({ field: { onChange, value, ...rest } }) => (
               <FormItem>
                 <FormLabel>PDF or Image File</FormLabel>
                 <FormControl>
-                  <Input type="file" accept="image/*,.pdf" onChange={handleFileChange} />
+                  <Input type="file" accept="image/*,.pdf" onChange={(e) => onChange(e.target.files)} {...rest} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -289,6 +289,7 @@ END:VCARD`;
           <p className="text-sm text-muted-foreground">
             Note: File upload requires a backend service. This demo will generate a QR code with placeholder text.
           </p>
+          <Button type="submit" className="w-full">Generate QR Code</Button>
         </form>
       </Form>
     );
