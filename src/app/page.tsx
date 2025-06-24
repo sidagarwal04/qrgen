@@ -4,9 +4,9 @@ import { Footer } from '@/components/layout/footer';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col bg-background">
       <Header />
-      <main className="flex-1 p-4 md:p-8">
+      <main className="p-4 md:p-8">
         <QrCodeGenerator />
       </main>
       <Footer />
