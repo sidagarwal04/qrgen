@@ -33,7 +33,7 @@ export function QrCustomization({ onChange, currentColors }: QrCustomizationProp
       <AccordionItem value="item-1">
         <AccordionTrigger className="text-lg font-semibold">Colors</AccordionTrigger>
         <AccordionContent className="space-y-4 pt-2">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="primaryColor">Primary Color</Label>
               <Input
