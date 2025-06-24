@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link, FileText, Wifi, Contact, FileUp } from 'lucide-react';
+import { Link, FileText, Wifi, Contact, Mail, MessageSquare } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -59,12 +59,23 @@ const vCardSchema = z.object({
   organization: z.string(),
 });
 
-const fileSchema = z.object({
-  file: (typeof window === 'undefined' ? z.any() : z.instanceof(FileList))
-    .refine((files) => files?.length > 0, 'File is required.'),
+const whatsappSchema = z.object({
+  phone: z.string().min(1, { message: 'Phone number is required.' }),
+  message: z.string().optional(),
 });
 
-type QrType = 'url' | 'text' | 'wifi' | 'vcard' | 'file';
+const emailSchema = z.object({
+  email: z.string().email({ message: 'Please enter a valid email.' }),
+  subject: z.string().optional(),
+  body: z.string().optional(),
+});
+
+const smsSchema = z.object({
+  phone: z.string().min(1, { message: 'Phone number is required.' }),
+  message: z.string().optional(),
+});
+
+type QrType = 'url' | 'text' | 'wifi' | 'vcard' | 'whatsapp' | 'email' | 'sms';
 
 export function QrCodeGenerator() {
   const [qrType, setQrType] = useState<QrType>('url');
@@ -82,7 +93,6 @@ export function QrCodeGenerator() {
     const form = useForm<z.infer<typeof urlSchema>>({
       resolver: zodResolver(urlSchema),
       defaultValues: { url: 'https://qrfy.com/' },
-      mode: 'onBlur'
     });
     
     function onSubmit(data: z.infer<typeof urlSchema>) {
@@ -258,16 +268,67 @@ END:VCARD`;
     );
   }
 
-  const FileForm = () => {
-    const form = useForm<z.infer<typeof fileSchema>>({
-      resolver: zodResolver(fileSchema),
+  const WhatsAppForm = () => {
+    const form = useForm<z.infer<typeof whatsappSchema>>({
+      resolver: zodResolver(whatsappSchema),
+      defaultValues: { phone: '', message: '' },
     });
 
-    function onSubmit(data: z.infer<typeof fileSchema>) {
-        const file = data.file?.[0];
-        if (file) {
-            setQrValue(`Your file "${file.name}" would be available for download here. This requires a backend for file storage.`);
-        }
+    function onSubmit(data: z.infer<typeof whatsappSchema>) {
+      const { phone, message } = data;
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      const whatsappUrl = `https://wa.me/${cleanPhone}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
+      setQrValue(whatsappUrl);
+    }
+    
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number</FormLabel>
+                <FormControl>
+                  <Input type="tel" placeholder="e.g., 1234567890 (with country code)" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="message"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Message (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Pre-filled message for WhatsApp" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full">Generate QR Code</Button>
+        </form>
+      </Form>
+    );
+  };
+  
+  const EmailForm = () => {
+    const form = useForm<z.infer<typeof emailSchema>>({
+      resolver: zodResolver(emailSchema),
+      defaultValues: { email: '', subject: '', body: '' },
+    });
+
+    function onSubmit(data: z.infer<typeof emailSchema>) {
+      const { email, subject, body } = data;
+      const params = new URLSearchParams();
+      if (subject) params.append('subject', subject);
+      if (body) params.append('body', body);
+      const queryString = params.toString();
+      setQrValue(`mailto:${email}${queryString ? `?${queryString}` : ''}`);
     }
 
     return (
@@ -275,32 +336,103 @@ END:VCARD`;
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name="file"
-            render={({ field: { onChange, value, ...rest } }) => (
+            name="email"
+            render={({ field }) => (
               <FormItem>
-                <FormLabel>PDF or Image File</FormLabel>
+                <FormLabel>Recipient Email</FormLabel>
                 <FormControl>
-                  <Input type="file" accept="image/*,.pdf" onChange={(e) => onChange(e.target.files)} {...rest} />
+                  <Input type="email" placeholder="recipient@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <p className="text-sm text-muted-foreground">
-            Note: File upload requires a backend service. This demo will generate a QR code with placeholder text.
-          </p>
+          <FormField
+            control={form.control}
+            name="subject"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subject (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Email subject" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="body"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Body (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Email body" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <Button type="submit" className="w-full">Generate QR Code</Button>
         </form>
       </Form>
     );
-  }
+  };
+  
+  const SmsForm = () => {
+    const form = useForm<z.infer<typeof smsSchema>>({
+      resolver: zodResolver(smsSchema),
+      defaultValues: { phone: '', message: '' },
+    });
+    
+    function onSubmit(data: z.infer<typeof smsSchema>) {
+        const { phone, message } = data;
+        setQrValue(`smsto:${phone.replace(/[^0-9]/g, '')}:${message || ''}`);
+    }
+
+    return (
+        <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                    <Input type="tel" placeholder="e.g., 1234567890" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Message (Optional)</FormLabel>
+                    <FormControl>
+                    <Textarea placeholder="Pre-filled SMS message" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <Button type="submit" className="w-full">Generate QR Code</Button>
+        </form>
+        </Form>
+    );
+  };
 
   const formComponents = {
     url: <UrlForm />,
     text: <TextForm />,
     wifi: <WifiForm />,
     vcard: <VCardForm />,
-    file: <FileForm />,
+    whatsapp: <WhatsAppForm />,
+    email: <EmailForm />,
+    sms: <SmsForm />,
   };
 
   const qrTypesConfig = [
@@ -308,7 +440,9 @@ END:VCARD`;
     { value: 'text', label: 'Text', icon: FileText },
     { value: 'wifi', label: 'WiFi', icon: Wifi },
     { value: 'vcard', label: 'vCard', icon: Contact },
-    { value: 'file', label: 'File', icon: FileUp },
+    { value: 'whatsapp', label: 'WhatsApp', icon: MessageSquare },
+    { value: 'email', label: 'Email', icon: Mail },
+    { value: 'sms', label: 'SMS', icon: MessageSquare },
   ];
 
   return (
@@ -316,7 +450,7 @@ END:VCARD`;
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
                 <Tabs value={qrType} onValueChange={(value) => setQrType(value as QrType)} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 mb-4 h-auto">
+                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-7 mb-4 h-auto">
                         {qrTypesConfig.map(config => (
                             <TabsTrigger key={config.value} value={config.value} className="flex flex-col sm:flex-row gap-2 h-auto py-2">
                                 <config.icon className="h-5 w-5" />
