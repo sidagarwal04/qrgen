@@ -1,19 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import type { CheckedState } from '@radix-ui/react-checkbox';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { createQrCodeTheme } from '@/ai/flows/create-qr-code-theme';
-import { Wand2 } from 'lucide-react';
 
 interface QrCustomizationProps {
   onChange: (customization: { primaryColor?: string; backgroundColor?: string }) => void;
@@ -21,41 +17,14 @@ interface QrCustomizationProps {
 }
 
 export function QrCustomization({ onChange, currentColors }: QrCustomizationProps) {
-  const [themeDescription, setThemeDescription] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
+  const isTransparent = currentColors.background === 'transparent';
 
-  const handleGenerateTheme = async () => {
-    if (!themeDescription.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Please enter a theme description.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      const result = await createQrCodeTheme({ themeDescription });
-      if (result?.qrCodeTheme) {
-        onChange({
-          primaryColor: result.qrCodeTheme.primaryColor,
-          backgroundColor: result.qrCodeTheme.backgroundColor,
-        });
-        toast({
-          title: 'Theme Generated!',
-          description: `Applied a ${result.qrCodeTheme.style} theme.`,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to generate theme. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsGenerating(false);
+  const handleTransparentToggle = (checked: CheckedState) => {
+    if (checked) {
+      onChange({ backgroundColor: 'transparent' });
+    } else {
+      // Revert to white when unchecked.
+      onChange({ backgroundColor: '#ffffff' });
     }
   };
 
@@ -80,28 +49,26 @@ export function QrCustomization({ onChange, currentColors }: QrCustomizationProp
               <Input
                 id="backgroundColor"
                 type="color"
-                value={currentColors.background}
+                value={isTransparent ? '#ffffff' : currentColors.background}
                 onChange={(e) => onChange({ backgroundColor: e.target.value })}
                 className="p-1 h-10"
+                disabled={isTransparent}
               />
             </div>
           </div>
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="item-2">
-        <AccordionTrigger className="text-lg font-semibold">AI Theme Creator</AccordionTrigger>
-        <AccordionContent className="space-y-4 pt-2">
-            <Label htmlFor="themeDescription">Theme Description</Label>
-            <Textarea
-                id="themeDescription"
-                placeholder="e.g., 'a futuristic theme with neon blue and dark gray'"
-                value={themeDescription}
-                onChange={(e) => setThemeDescription(e.target.value)}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="transparent-bg"
+              checked={isTransparent}
+              onCheckedChange={handleTransparentToggle}
             />
-            <Button onClick={handleGenerateTheme} disabled={isGenerating} className="w-full">
-                <Wand2 className="mr-2 h-4 w-4" />
-                {isGenerating ? 'Generating...' : 'Generate with AI'}
-            </Button>
+            <Label
+              htmlFor="transparent-bg"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Transparent Background
+            </Label>
+          </div>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

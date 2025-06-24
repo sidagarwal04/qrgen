@@ -79,9 +79,9 @@ type QrType = 'url' | 'text' | 'wifi' | 'vcard' | 'whatsapp' | 'email' | 'sms';
 
 export function QrCodeGenerator() {
   const [qrType, setQrType] = useState<QrType>('url');
-  const [qrValue, setQrValue] = useState('https://qrfy.com/');
+  const [qrValue, setQrValue] = useState('https://qrgen.com/');
   const [customization, setCustomization] = useState({
-    primaryColor: '#1F9481',
+    primaryColor: '#000000',
     backgroundColor: '#ffffff',
   });
 
@@ -92,7 +92,7 @@ export function QrCodeGenerator() {
   const UrlForm = () => {
     const form = useForm<z.infer<typeof urlSchema>>({
       resolver: zodResolver(urlSchema),
-      defaultValues: { url: 'https://qrfy.com/' },
+      defaultValues: { url: 'https://qrgen.com/' },
     });
     
     function onSubmit(data: z.infer<typeof urlSchema>) {

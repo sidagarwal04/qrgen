@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'QRify - Create Custom QR Codes',
-  description: 'Generate and customize QR codes for websites, text, WiFi, and more.',
+  title: 'QRgen - Create Custom QR Codes',
+  description: 'Generate and customize QR codes for websites, text, WiFi, and more with QRgen.',
 };
 
 export default function RootLayout({
