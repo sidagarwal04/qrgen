@@ -34,7 +34,7 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDi
     }
 
     if (format === 'svg') {
-      triggerDownload(url, 'qrcode.svg');
+      triggerDownload(url, 'qrgen.svg');
     } else if (format === 'png') {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -44,7 +44,7 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDi
             canvas.height = 256;
             ctx?.drawImage(img, 0, 0, 256, 256);
             const pngUrl = canvas.toDataURL('image/png');
-            triggerDownload(pngUrl, 'qrcode.png');
+            triggerDownload(pngUrl, 'qrgen.png');
         };
         img.src = url;
     }
