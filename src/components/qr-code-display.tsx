@@ -71,7 +71,7 @@ export function QrCodeDisplay({
       backgroundOptions: { color: qrBgColor },
       cornersSquareOptions: { type: cornersSquareType, color: primaryColor },
       cornersDotOptions: { type: cornersDotType, color: primaryColor },
-      qrOptions: { errorCorrectionLevel: 'H' },
+      qrOptions: { errorCorrectionLevel: 'M' },
     };
 
     import('qr-code-styling').then(({ default: QRCodeStyling }) => {
