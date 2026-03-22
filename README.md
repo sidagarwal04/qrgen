@@ -1,5 +1,7 @@
 # QRgen
 
+**Live app → [qrgen.meetsid.dev](https://qrgen.meetsid.dev)**
+
 A modern, fully-featured QR code generator built with Next.js. Generate, style, and download QR codes for any use case — no account required.
 
 ## Features
@@ -43,6 +45,10 @@ A modern, fully-featured QR code generator built with Next.js. Generate, style, 
 | Styling | [Tailwind CSS](https://tailwindcss.com) + [Autoprefixer](https://github.com/postcss/autoprefixer) |
 | Icons | [Lucide](https://lucide.dev) |
 | Forms | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) |
+
+## Deployment
+
+Hosted on [Netlify](https://netlify.com) at **[qrgen.meetsid.dev](https://qrgen.meetsid.dev)**.
 
 ## Getting Started
 
