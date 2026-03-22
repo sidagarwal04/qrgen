@@ -549,6 +549,7 @@ END:VCARD`;
                 <QrCodeDisplay
                   value={qrValue}
                   {...customization}
+                  testUrl={qrType === 'url' ? qrValue : undefined}
                   footer={
                     <QrCustomization
                       onChange={handleCustomizationChange}

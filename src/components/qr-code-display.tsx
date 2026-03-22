@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, type ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, QrCode, Info, Copy, Check } from 'lucide-react';
+import { Download, QrCode, Info, Copy, Check, ExternalLink } from 'lucide-react';
 import type { CornerSquareType, CornerDotType, DotsType, FrameType } from './qr-customization';
 
 interface QrCodeDisplayProps {
@@ -16,6 +16,7 @@ interface QrCodeDisplayProps {
   logoImage: string;
   frameType: FrameType;
   frameLabel: string;
+  testUrl?: string;
   footer?: ReactNode;
 }
 
@@ -224,6 +225,7 @@ export function QrCodeDisplay({
   logoImage,
   frameType,
   frameLabel,
+  testUrl,
   footer,
 }: QrCodeDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -412,6 +414,18 @@ export function QrCodeDisplay({
               <p>Your QR code will appear here</p>
             </div>
           </div>
+        )}
+
+        {testUrl && value && (
+          <a
+            href={testUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Open URL to test
+          </a>
         )}
 
         <div className="flex w-full gap-2">
