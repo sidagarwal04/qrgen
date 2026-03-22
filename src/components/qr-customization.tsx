@@ -1,7 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
-import { ImagePlus, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -174,30 +172,34 @@ function FrameIcon({ type }: { type: FrameType }) {
       );
     case 'label-bottom':
       return (
+        // Text sits BELOW the border with a visible gap
         <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
-          <rect x="1.5" y="1" width="17" height="15.5" stroke="currentColor" strokeWidth="1.8" rx="2" />
-          {qrArea}
-          <text x="10" y="14.5" textAnchor="middle" fontSize="3.8" fill="currentColor"
+          <rect x="1.5" y="1" width="17" height="12" stroke="currentColor" strokeWidth="1.8" rx="2" />
+          <rect x="4.5" y="3" width="11" height="8" fill="currentColor" fillOpacity="0.2" rx="1" />
+          <text x="10" y="17" textAnchor="middle" fontSize="3.8" fill="currentColor"
             fontFamily="sans-serif" fontWeight="bold" dominantBaseline="middle">SCAN ME</text>
         </svg>
       );
     case 'banner-bottom':
       return (
+        // Thin divider line separates the QR area from the filled banner
         <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
           <rect x="1.5" y="1" width="17" height="18" stroke="currentColor" strokeWidth="1.8" rx="2" />
-          {qrArea}
-          <rect x="2.2" y="13.5" width="15.6" height="4.8" fill="currentColor" rx="1.2" />
-          <text x="10" y="16" textAnchor="middle" fontSize="3.5" fill="white"
+          <rect x="4.5" y="3" width="11" height="8" fill="currentColor" fillOpacity="0.2" rx="1" />
+          <line x1="1.5" y1="12.5" x2="18.5" y2="12.5" stroke="currentColor" strokeWidth="0.7" strokeOpacity="0.35" />
+          <rect x="2.2" y="13" width="15.6" height="5.3" fill="currentColor" rx="1.2" />
+          <text x="10" y="15.5" textAnchor="middle" fontSize="3.5" fill="white"
             fontFamily="sans-serif" fontWeight="bold" dominantBaseline="middle">SCAN ME</text>
         </svg>
       );
     case 'label-top':
       return (
+        // Text sits ABOVE the border with a visible gap
         <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
-          <text x="10" y="4" textAnchor="middle" fontSize="3.8" fill="currentColor"
+          <text x="10" y="3" textAnchor="middle" fontSize="3.8" fill="currentColor"
             fontFamily="sans-serif" fontWeight="bold" dominantBaseline="middle">SCAN ME</text>
-          <rect x="1.5" y="6" width="17" height="13" stroke="currentColor" strokeWidth="1.8" rx="2" />
-          <rect x="4.5" y="8" width="11" height="9" fill="currentColor" fillOpacity="0.2" rx="1" />
+          <rect x="1.5" y="6.5" width="17" height="12.5" stroke="currentColor" strokeWidth="1.8" rx="2" />
+          <rect x="4.5" y="8.5" width="11" height="8.5" fill="currentColor" fillOpacity="0.2" rx="1" />
         </svg>
       );
   }
@@ -212,7 +214,6 @@ interface QrCustomizationProps {
     cornersSquareType?: CornerSquareType;
     cornersDotType?: CornerDotType;
     dotsType?: DotsType;
-    logoImage?: string;
     frameType?: FrameType;
     frameLabel?: string;
   }) => void;
@@ -220,23 +221,11 @@ interface QrCustomizationProps {
   cornersSquareType: CornerSquareType;
   cornersDotType: CornerDotType;
   dotsType: DotsType;
-  logoImage: string;
   frameType: FrameType;
   frameLabel: string;
 }
 
-export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType, dotsType, logoImage, frameType, frameLabel }: QrCustomizationProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onChange({ logoImage: ev.target?.result as string });
-    reader.readAsDataURL(file);
-    // Reset so the same file can be re-uploaded after removal
-    e.target.value = '';
-  };
+export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType, dotsType, frameType, frameLabel }: QrCustomizationProps) {
   const isTransparent = currentColors.background === 'transparent';
 
   const selectedPresetId = CORNER_PRESETS.find(
@@ -315,43 +304,9 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
         })}
       </div>
 
-      {/* Logo */}
-      <p className="text-sm font-semibold leading-none pt-1">Logo</p>
-      {logoImage ? (
-        <div className="flex items-center gap-2">
-          <div className="relative shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoImage} alt="Logo" className="h-10 w-10 rounded-md border object-contain bg-white p-0.5" />
-            <button
-              type="button"
-              onClick={() => onChange({ logoImage: '' })}
-              className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow"
-            >
-              <X className="h-2.5 w-2.5" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-xs text-muted-foreground transition-colors hover:border-primary/60 hover:text-primary"
-        >
-          <ImagePlus className="h-4 w-4" />
-          Upload logo (PNG, JPG, SVG)
-        </button>
-      )}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/svg+xml,image/webp"
-        className="hidden"
-        onChange={handleLogoUpload}
-      />
-
       {/* Frame */}
       <p className="text-sm font-semibold leading-none pt-1">Frame</p>
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-6 gap-1.5">
         {FRAME_PRESETS.map((preset) => {
           const isSelected = preset.id === frameType;
           return (

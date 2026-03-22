@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link, FileText, Wifi, Contact, Mail, MessageSquare } from 'lucide-react';
+import { Link, FileText, Wifi, Contact, Mail, MessageSquare, ImagePlus, X, RotateCcw } from 'lucide-react';
+import type { CornerSquareType, CornerDotType, DotsType, FrameType } from './qr-customization';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -76,23 +77,37 @@ const smsSchema = z.object({
 
 type QrType = 'url' | 'text' | 'wifi' | 'vcard' | 'whatsapp' | 'email' | 'sms';
 
+const DEFAULT_CUSTOMIZATION = {
+  primaryColor: '#000000',
+  backgroundColor: '#ffffff',
+  cornersSquareType: 'square' as CornerSquareType,
+  cornersDotType: 'square' as CornerDotType,
+  dotsType: 'square' as DotsType,
+  logoImage: '',
+  frameType: 'none' as FrameType,
+  frameLabel: 'SCAN ME',
+};
+
 export function QrCodeGenerator() {
   const [qrType, setQrType] = useState<QrType>('url');
   const [qrValue, setQrValue] = useState('');
-  const [customization, setCustomization] = useState({
-    primaryColor: '#000000',
-    backgroundColor: '#ffffff',
-    cornersSquareType: 'square' as import('./qr-customization').CornerSquareType,
-    cornersDotType: 'square' as import('./qr-customization').CornerDotType,
-    dotsType: 'square' as import('./qr-customization').DotsType,
-    logoImage: '',
-    frameType: 'none' as import('./qr-customization').FrameType,
-    frameLabel: 'SCAN ME',
-  });
+  const [customization, setCustomization] = useState(DEFAULT_CUSTOMIZATION);
+  const logoFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCustomizationChange = (newCustomization: Partial<typeof customization>) => {
     setCustomization(prev => ({ ...prev, ...newCustomization }));
   };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => handleCustomizationChange({ logoImage: ev.target?.result as string });
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleReset = () => setCustomization(DEFAULT_CUSTOMIZATION);
 
   const UrlForm = () => {
     const form = useForm<z.infer<typeof urlSchema>>({
@@ -477,6 +492,57 @@ END:VCARD`;
                         </TabsContent>
                     ))}
                 </Tabs>
+
+                {/* Logo — inline row */}
+                <Card className="mt-6">
+                  <CardContent className="flex items-center gap-3 p-2.5">
+                    <p className="shrink-0 text-sm font-semibold leading-none text-primary">Add a logo or center text</p>
+
+                    {customization.logoImage ? (
+                      <div className="relative shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={customization.logoImage}
+                          alt="Logo"
+                          className="h-8 w-8 rounded-md border object-contain bg-white p-0.5"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleCustomizationChange({ logoImage: '' })}
+                          className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow"
+                        >
+                          <X className="h-2.5 w-2.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => logoFileInputRef.current?.click()}
+                        className="flex flex-1 h-8 items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border text-xs text-muted-foreground transition-colors hover:border-primary/60 hover:text-primary"
+                      >
+                        <ImagePlus className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">Upload logo</span>
+                      </button>
+                    )}
+                    <input
+                      ref={logoFileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Reset — standalone */}
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="mt-5 flex w-full items-center justify-center gap-1.5 text-xs text-primary transition-colors hover:text-primary/80"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Reset to defaults
+                </button>
             </div>
             <div className="lg:col-span-1 lg:self-start">
               <div className="lg:sticky lg:top-14">
@@ -493,7 +559,6 @@ END:VCARD`;
                       cornersSquareType={customization.cornersSquareType}
                       cornersDotType={customization.cornersDotType}
                       dotsType={customization.dotsType}
-                      logoImage={customization.logoImage}
                       frameType={customization.frameType}
                       frameLabel={customization.frameLabel}
                     />
