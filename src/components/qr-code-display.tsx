@@ -315,10 +315,10 @@ export function QrCodeDisplay({
 
   return (
     <Card className="shadow-lg">
-      <CardHeader className="space-y-0 p-3 pb-1.5">
+      <CardHeader className="space-y-0 px-3 pt-2 pb-1">
         <CardTitle className="text-lg">Your QR Code</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center gap-2 p-3 pt-0 pb-2">
+      <CardContent className="flex flex-col items-center gap-2 px-3 pt-0 pb-2">
 
         {/* QR + frame preview — always in DOM (CSS display:none keeps the ref alive) */}
         <div style={{ display: value ? 'flex' : 'none', flexDirection: 'column', alignItems: 'stretch' }}>
