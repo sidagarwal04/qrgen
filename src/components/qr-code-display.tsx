@@ -231,6 +231,8 @@ export function QrCodeDisplay({
   const containerRef = useRef<HTMLDivElement>(null);
   const qrInstanceRef = useRef<QRCodeStylingInstance | null>(null);
   const [copied, setCopied] = useState(false);
+  const [qrFadedIn, setQrFadedIn] = useState(false);
+  const prevHasValueRef = useRef(false);
 
   const isTransparent = backgroundColor === 'transparent';
   const previewBgColor = isTransparent
@@ -277,6 +279,23 @@ export function QrCodeDisplay({
       }
     });
   }, [value, primaryColor, backgroundColor, isTransparent, cornersSquareType, cornersDotType, dotsType, logoImage]);
+
+  // Fade in only when value first appears (empty → filled transition)
+  useEffect(() => {
+    const hasValue = !!value;
+    if (hasValue && !prevHasValueRef.current) {
+      setQrFadedIn(false);
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setQrFadedIn(true));
+      });
+      prevHasValueRef.current = true;
+      return () => cancelAnimationFrame(raf);
+    }
+    if (!hasValue) {
+      setQrFadedIn(false);
+      prevHasValueRef.current = false;
+    }
+  }, [value]);
 
   const downloadAs = (format: 'svg' | 'png') => {
     const svgElement = containerRef.current?.querySelector('svg');
@@ -358,7 +377,13 @@ export function QrCodeDisplay({
       <CardContent className="flex flex-col items-center gap-2 px-3 pt-0 pb-2">
 
         {/* QR + frame preview — always in DOM (CSS display:none keeps the ref alive) */}
-        <div style={{ display: value ? 'flex' : 'none', flexDirection: 'column', alignItems: 'stretch' }}>
+        <div style={{
+          display: value ? 'flex' : 'none',
+          flexDirection: 'column',
+          alignItems: 'stretch',
+          opacity: qrFadedIn ? 1 : 0,
+          transition: 'opacity 300ms ease',
+        }}>
           <div
             style={{
               backgroundColor: previewBgColor,
