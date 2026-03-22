@@ -86,6 +86,8 @@ export function QrCodeGenerator() {
     cornersDotType: 'square' as import('./qr-customization').CornerDotType,
     dotsType: 'square' as import('./qr-customization').DotsType,
     logoImage: '',
+    frameType: 'none' as import('./qr-customization').FrameType,
+    frameLabel: 'SCAN ME',
   });
 
   const handleCustomizationChange = (newCustomization: Partial<typeof customization>) => {
@@ -492,6 +494,8 @@ END:VCARD`;
                       cornersDotType={customization.cornersDotType}
                       dotsType={customization.dotsType}
                       logoImage={customization.logoImage}
+                      frameType={customization.frameType}
+                      frameLabel={customization.frameLabel}
                     />
                   }
                 />

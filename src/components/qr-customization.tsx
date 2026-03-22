@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 export type CornerSquareType = 'square' | 'extra-rounded' | 'dot';
 export type CornerDotType = 'square' | 'dot';
 export type DotsType = 'square' | 'dots' | 'rounded' | 'extra-rounded' | 'classy' | 'classy-rounded';
+export type FrameType = 'none' | 'simple' | 'label-bottom' | 'banner-bottom' | 'label-top';
 
 export interface CornerPreset {
   id: string;
@@ -142,6 +143,66 @@ function PatternIcon({ type }: { type: DotsType }) {
   );
 }
 
+// ─── Frame styles ─────────────────────────────────────────────────────────────
+
+export const FRAME_PRESETS: { id: FrameType; label: string }[] = [
+  { id: 'none',          label: 'No frame' },
+  { id: 'simple',        label: 'Simple border' },
+  { id: 'label-bottom',  label: 'Label below' },
+  { id: 'banner-bottom', label: 'Banner below' },
+  { id: 'label-top',     label: 'Label above' },
+];
+
+function FrameIcon({ type }: { type: FrameType }) {
+  // Shared: light fill representing the QR area
+  const qrArea = <rect x="4.5" y="3" width="11" height="9" fill="currentColor" fillOpacity="0.2" rx="1" />;
+
+  switch (type) {
+    case 'none':
+      return (
+        <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
+          <line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+      );
+    case 'simple':
+      return (
+        <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
+          <rect x="2" y="2" width="16" height="16" stroke="currentColor" strokeWidth="1.8" rx="2" />
+          <rect x="5" y="5" width="10" height="10" fill="currentColor" fillOpacity="0.2" rx="1" />
+        </svg>
+      );
+    case 'label-bottom':
+      return (
+        <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
+          <rect x="1.5" y="1" width="17" height="15.5" stroke="currentColor" strokeWidth="1.8" rx="2" />
+          {qrArea}
+          <text x="10" y="14.5" textAnchor="middle" fontSize="3.8" fill="currentColor"
+            fontFamily="sans-serif" fontWeight="bold" dominantBaseline="middle">SCAN ME</text>
+        </svg>
+      );
+    case 'banner-bottom':
+      return (
+        <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
+          <rect x="1.5" y="1" width="17" height="18" stroke="currentColor" strokeWidth="1.8" rx="2" />
+          {qrArea}
+          <rect x="2.2" y="13.5" width="15.6" height="4.8" fill="currentColor" rx="1.2" />
+          <text x="10" y="16" textAnchor="middle" fontSize="3.5" fill="white"
+            fontFamily="sans-serif" fontWeight="bold" dominantBaseline="middle">SCAN ME</text>
+        </svg>
+      );
+    case 'label-top':
+      return (
+        <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
+          <text x="10" y="4" textAnchor="middle" fontSize="3.8" fill="currentColor"
+            fontFamily="sans-serif" fontWeight="bold" dominantBaseline="middle">SCAN ME</text>
+          <rect x="1.5" y="6" width="17" height="13" stroke="currentColor" strokeWidth="1.8" rx="2" />
+          <rect x="4.5" y="8" width="11" height="9" fill="currentColor" fillOpacity="0.2" rx="1" />
+        </svg>
+      );
+  }
+}
+
 // ─── Props ─────────────────────────────────────────────────────────────────────
 
 interface QrCustomizationProps {
@@ -152,15 +213,19 @@ interface QrCustomizationProps {
     cornersDotType?: CornerDotType;
     dotsType?: DotsType;
     logoImage?: string;
+    frameType?: FrameType;
+    frameLabel?: string;
   }) => void;
   currentColors: { primary: string; background: string };
   cornersSquareType: CornerSquareType;
   cornersDotType: CornerDotType;
   dotsType: DotsType;
   logoImage: string;
+  frameType: FrameType;
+  frameLabel: string;
 }
 
-export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType, dotsType, logoImage }: QrCustomizationProps) {
+export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType, dotsType, logoImage, frameType, frameLabel }: QrCustomizationProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,6 +348,41 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
         className="hidden"
         onChange={handleLogoUpload}
       />
+
+      {/* Frame */}
+      <p className="text-sm font-semibold leading-none pt-1">Frame</p>
+      <div className="grid grid-cols-5 gap-1.5">
+        {FRAME_PRESETS.map((preset) => {
+          const isSelected = preset.id === frameType;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              title={preset.label}
+              onClick={() => onChange({ frameType: preset.id })}
+              className={cn(
+                'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
+                'hover:border-primary/60 hover:bg-primary/5',
+                isSelected
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-background text-foreground',
+              )}
+              style={{ aspectRatio: '1' }}
+            >
+              <FrameIcon type={preset.id} />
+            </button>
+          );
+        })}
+      </div>
+      {frameType !== 'none' && frameType !== 'simple' && (
+        <Input
+          value={frameLabel}
+          onChange={(e) => onChange({ frameLabel: e.target.value })}
+          placeholder="SCAN ME"
+          maxLength={24}
+          className="h-8 text-xs tracking-widest uppercase"
+        />
+      )}
 
       {/* Corner styles */}
       <p className="text-sm font-semibold leading-none pt-1">Corners</p>
