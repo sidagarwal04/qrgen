@@ -1,9 +1,8 @@
 'use client';
 
-import type { CheckedState } from '@radix-ui/react-checkbox';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 interface QrCustomizationProps {
   onChange: (customization: { primaryColor?: string; backgroundColor?: string }) => void;
@@ -13,12 +12,8 @@ interface QrCustomizationProps {
 export function QrCustomization({ onChange, currentColors }: QrCustomizationProps) {
   const isTransparent = currentColors.background === 'transparent';
 
-  const handleTransparentToggle = (checked: CheckedState) => {
-    if (checked) {
-      onChange({ backgroundColor: 'transparent' });
-    } else {
-      onChange({ backgroundColor: '#ffffff' });
-    }
+  const handleTransparentToggle = (checked: boolean) => {
+    onChange({ backgroundColor: checked ? 'transparent' : '#ffffff' });
   };
 
   return (
@@ -52,12 +47,12 @@ export function QrCustomization({ onChange, currentColors }: QrCustomizationProp
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Checkbox
+        <Switch
           id="transparent-bg"
           checked={isTransparent}
           onCheckedChange={handleTransparentToggle}
         />
-        <Label htmlFor="transparent-bg" className="text-xs font-medium leading-snug">
+        <Label htmlFor="transparent-bg" className="text-xs font-medium cursor-pointer">
           Transparent background
         </Label>
       </div>
