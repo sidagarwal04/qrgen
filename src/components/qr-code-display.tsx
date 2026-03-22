@@ -4,7 +4,7 @@ import { useRef, useEffect, type ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, QrCode, Info } from 'lucide-react';
-import type { CornerSquareType, CornerDotType } from './qr-customization';
+import type { CornerSquareType, CornerDotType, DotsType } from './qr-customization';
 
 interface QrCodeDisplayProps {
   value: string;
@@ -12,6 +12,7 @@ interface QrCodeDisplayProps {
   backgroundColor: string;
   cornersSquareType: CornerSquareType;
   cornersDotType: CornerDotType;
+  dotsType: DotsType;
   /** Renders below the download buttons inside the same card (e.g. color controls). */
   footer?: ReactNode;
 }
@@ -36,6 +37,7 @@ export function QrCodeDisplay({
   backgroundColor,
   cornersSquareType,
   cornersDotType,
+  dotsType,
   footer,
 }: QrCodeDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,7 +69,7 @@ export function QrCodeDisplay({
       height: qrSize,
       type: 'svg' as const,
       data: value,
-      dotsOptions: { color: primaryColor, type: 'square' },
+      dotsOptions: { color: primaryColor, type: dotsType },
       backgroundOptions: { color: qrBgColor },
       cornersSquareOptions: { type: cornersSquareType, color: primaryColor },
       cornersDotOptions: { type: cornersDotType, color: primaryColor },
@@ -84,7 +86,7 @@ export function QrCodeDisplay({
         qrInstanceRef.current.update(options as Record<string, unknown>);
       }
     });
-  }, [value, primaryColor, backgroundColor, isTransparent, cornersSquareType, cornersDotType]);
+  }, [value, primaryColor, backgroundColor, isTransparent, cornersSquareType, cornersDotType, dotsType]);
 
   const downloadAs = (format: 'svg' | 'png') => {
     const svgElement = containerRef.current?.querySelector('svg');

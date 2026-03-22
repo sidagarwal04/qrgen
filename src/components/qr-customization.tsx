@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 
 export type CornerSquareType = 'square' | 'extra-rounded' | 'dot';
 export type CornerDotType = 'square' | 'dot';
+export type DotsType = 'square' | 'dots' | 'rounded' | 'extra-rounded' | 'classy' | 'classy-rounded';
 
 export interface CornerPreset {
   id: string;
@@ -54,19 +55,108 @@ function CornerIcon({ cornersSquare, cornersDot }: { cornersSquare: CornerSquare
   );
 }
 
+// ─── Pattern (dots) styles ────────────────────────────────────────────────────
+
+export interface PatternPreset {
+  id: DotsType;
+  label: string;
+}
+
+export const PATTERN_PRESETS: PatternPreset[] = [
+  { id: 'square',        label: 'Square' },
+  { id: 'rounded',       label: 'Rounded' },
+  { id: 'dots',          label: 'Dots' },
+  { id: 'extra-rounded', label: 'Extra Rounded' },
+  { id: 'classy',        label: 'Classy' },
+  { id: 'classy-rounded', label: 'Classy Rounded' },
+];
+
+// Sparse 3×3 grid positions — gives a QR-like feel with larger, shape-distinguishable dots.
+// cellSize = 20/3 ≈ 6.67px  →  dot r = 2.5 (75% fill, big enough to see shape differences)
+const PATTERN_DOT_POSITIONS: [number, number][] = [
+  [0, 0], [2, 0],
+  [0, 1], [1, 1], [2, 1],
+  [1, 2], [2, 2],
+];
+const CELL = 20 / 3;
+
+function renderPatternDot(cx: number, cy: number, type: DotsType, key: number) {
+  const r = 2.5;
+
+  switch (type) {
+    case 'dots':
+      // Perfect circle — unmistakably round
+      return <circle key={key} cx={cx} cy={cy} r={r} fill="currentColor" />;
+
+    case 'rounded':
+      // Square with clearly visible rounded corners (40% radius)
+      return <rect key={key} x={cx - r} y={cy - r} width={r * 2} height={r * 2} rx={r * 0.4} fill="currentColor" />;
+
+    case 'extra-rounded': {
+      // Squircle via cubic Bézier (k≈0.85 vs 0.552 for a circle).
+      // Has visibly flat sides — clearly different from both dots and rounded.
+      const k = 0.85;
+      const d = [
+        `M ${cx},${cy - r}`,
+        `C ${cx + r * k},${cy - r} ${cx + r},${cy - r * k} ${cx + r},${cy}`,
+        `C ${cx + r},${cy + r * k} ${cx + r * k},${cy + r} ${cx},${cy + r}`,
+        `C ${cx - r * k},${cy + r} ${cx - r},${cy + r * k} ${cx - r},${cy}`,
+        `C ${cx - r},${cy - r * k} ${cx - r * k},${cy - r} ${cx},${cy - r} Z`,
+      ].join(' ');
+      return <path key={key} d={d} fill="currentColor" />;
+    }
+
+    case 'classy': {
+      // Sharp diamond — rotated square, no rounded corners
+      const cr = 2.0; // smaller so diagonals don't overlap neighbouring cells
+      return (
+        <rect key={key} x={cx - cr} y={cy - cr} width={cr * 2} height={cr * 2}
+          rx={0} transform={`rotate(45,${cx},${cy})`} fill="currentColor" />
+      );
+    }
+
+    case 'classy-rounded': {
+      // Rounded diamond — same diamond but with clearly visible corner rounding
+      const cr = 2.0;
+      return (
+        <rect key={key} x={cx - cr} y={cy - cr} width={cr * 2} height={cr * 2}
+          rx={cr * 0.5} transform={`rotate(45,${cx},${cy})`} fill="currentColor" />
+      );
+    }
+
+    default: // 'square'
+      // Crisp square, no rounding at all
+      return <rect key={key} x={cx - r} y={cy - r} width={r * 2} height={r * 2} rx={0} fill="currentColor" />;
+  }
+}
+
+function PatternIcon({ type }: { type: DotsType }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className="h-full w-full">
+      {PATTERN_DOT_POSITIONS.map(([col, row], i) =>
+        renderPatternDot(col * CELL + CELL / 2, row * CELL + CELL / 2, type, i),
+      )}
+    </svg>
+  );
+}
+
+// ─── Props ─────────────────────────────────────────────────────────────────────
+
 interface QrCustomizationProps {
   onChange: (customization: {
     primaryColor?: string;
     backgroundColor?: string;
     cornersSquareType?: CornerSquareType;
     cornersDotType?: CornerDotType;
+    dotsType?: DotsType;
   }) => void;
   currentColors: { primary: string; background: string };
   cornersSquareType: CornerSquareType;
   cornersDotType: CornerDotType;
+  dotsType: DotsType;
 }
 
-export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType }: QrCustomizationProps) {
+export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType, dotsType }: QrCustomizationProps) {
   const isTransparent = currentColors.background === 'transparent';
 
   const selectedPresetId = CORNER_PRESETS.find(
@@ -117,6 +207,32 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
         <Label htmlFor="transparent-bg" className="text-xs font-medium cursor-pointer">
           Transparent background
         </Label>
+      </div>
+
+      {/* Pattern (dot) styles */}
+      <p className="text-sm font-semibold leading-none pt-1">Patterns</p>
+      <div className="grid grid-cols-6 gap-1.5">
+        {PATTERN_PRESETS.map((preset) => {
+          const isSelected = preset.id === dotsType;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              title={preset.label}
+              onClick={() => onChange({ dotsType: preset.id })}
+              className={cn(
+                'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
+                'hover:border-primary/60 hover:bg-primary/5',
+                isSelected
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-background text-foreground',
+              )}
+              style={{ aspectRatio: '1' }}
+            >
+              <PatternIcon type={preset.id} />
+            </button>
+          );
+        })}
       </div>
 
       {/* Corner styles */}
