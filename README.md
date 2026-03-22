@@ -1,5 +1,5 @@
 # QRgen
 
-This is a NextJS starter in Firebase Studio for QRgen.
+Next.js app for generating and styling QR codes.
 
-To get started, take a look at src/app/page.tsx.
+To get started, open `src/app/page.tsx`.
