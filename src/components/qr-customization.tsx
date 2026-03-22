@@ -357,15 +357,7 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
             );
           })}
         </div>
-        {frameType !== 'none' && frameType !== 'simple' && (
-          <Input
-            value={frameLabel}
-            onChange={(e) => onChange({ frameLabel: e.target.value })}
-            placeholder="SCAN ME"
-            maxLength={24}
-            className="h-8 text-xs tracking-widest uppercase"
-          />
-        )}
+
 
         <Separator />
 
