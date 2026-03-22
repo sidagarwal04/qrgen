@@ -5,7 +5,7 @@ A modern, fully-featured QR code generator built with Next.js. Generate, style, 
 ## Features
 
 ### QR Code Types
-- **URL** — website links
+- **URL** — website links, with a one-click "Open URL to test" shortcut
 - **Text** — plain text
 - **WiFi** — network credentials (SSID, password, security type)
 - **vCard** — contact cards
@@ -14,22 +14,24 @@ A modern, fully-featured QR code generator built with Next.js. Generate, style, 
 - **SMS** — pre-filled text messages
 
 ### Customisation
-- **Colors** — choose any foreground (primary) and background color via color pickers
-- **Transparent background** — toggle to remove the background; the preview auto-adjusts to a contrasting color so the QR remains visible, while the downloaded file stays fully transparent
-- **Patterns** — six dot styles for the QR modules: Square, Rounded, Dots, Extra Rounded, Classy, Classy Rounded
+- **Colors** — foreground and background color pickers with live hex value display
+- **Transparent background** — toggle to remove the background; preview auto-adjusts to a contrasting color while the downloaded file stays fully transparent
+- **Patterns** — six dot styles for QR modules: Square, Rounded, Dots, Extra Rounded, Classy, Classy Rounded
 - **Corners** — six finder-pattern styles combining square, rounded, and circle outer/inner shapes
-- **Frames** — five decorative frame options (none, simple border, label below, banner below, label above) with a customisable label text
-- **Logo / center image** — embed any PNG, JPG, or SVG image in the center of the QR code (error correction automatically raised to Q for reliability)
+- **Frames** — five decorative frame options: none, simple border, label below, banner below, label above
+- **Logo / center image** — embed any PNG, JPG, or SVG in the center of the QR code (error correction auto-raised to Q)
+- **Tooltips** — hover any pattern, corner, or frame icon for an instant label
 
-### Download
+### Export
+- **PNG** — raster export at 512 × 512 px with full transparency and frame compositing
 - **SVG** — lossless vector, ideal for print
-- **PNG** — raster export at 1024 × 1024 px, with full transparency support and frame compositing
+- **Copy to clipboard** — copy the QR as a PNG image in one click
 
 ### UX
 - Live preview updates instantly as you change any option
-- **Reset to defaults** — one click to restore all settings to their original state
+- Smooth fade-in animation when the QR first renders
+- **Reset to defaults** — one click to restore all settings
 - No scroll on desktop — layout fits within the viewport
-- Built-in credit line in the header
 
 ## Tech Stack
 
@@ -38,7 +40,7 @@ A modern, fully-featured QR code generator built with Next.js. Generate, style, 
 | Framework | [Next.js 15](https://nextjs.org) (App Router) |
 | QR engine | [qr-code-styling](https://github.com/kozakdenys/qr-code-styling) |
 | UI components | [shadcn/ui](https://ui.shadcn.com) |
-| Styling | [Tailwind CSS](https://tailwindcss.com) |
+| Styling | [Tailwind CSS](https://tailwindcss.com) + [Autoprefixer](https://github.com/postcss/autoprefixer) |
 | Icons | [Lucide](https://lucide.dev) |
 | Forms | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) |
 
