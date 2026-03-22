@@ -82,6 +82,8 @@ export function QrCodeGenerator() {
   const [customization, setCustomization] = useState({
     primaryColor: '#000000',
     backgroundColor: '#ffffff',
+    cornersSquareType: 'square' as import('./qr-customization').CornerSquareType,
+    cornersDotType: 'square' as import('./qr-customization').CornerDotType,
   });
 
   const handleCustomizationChange = (newCustomization: Partial<typeof customization>) => {
@@ -484,6 +486,8 @@ END:VCARD`;
                         primary: customization.primaryColor,
                         background: customization.backgroundColor,
                       }}
+                      cornersSquareType={customization.cornersSquareType}
+                      cornersDotType={customization.cornersDotType}
                     />
                   }
                 />

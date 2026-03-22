@@ -1,17 +1,24 @@
 'use client';
 
-import { useRef, type ReactNode } from 'react';
-import QRCode from 'react-qr-code';
+import { useRef, useEffect, type ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, QrCode, Info } from 'lucide-react';
+import type { CornerSquareType, CornerDotType } from './qr-customization';
 
 interface QrCodeDisplayProps {
   value: string;
   primaryColor: string;
   backgroundColor: string;
+  cornersSquareType: CornerSquareType;
+  cornersDotType: CornerDotType;
   /** Renders below the download buttons inside the same card (e.g. color controls). */
   footer?: ReactNode;
+}
+
+interface QRCodeStylingInstance {
+  append: (element: HTMLElement) => void;
+  update: (options: Record<string, unknown>) => void;
 }
 
 /** Returns true if the hex color is perceived as dark (luminance < 0.5). */
@@ -23,19 +30,64 @@ function isColorDark(hex: string): boolean {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
 }
 
-export function QrCodeDisplay({ value, primaryColor, backgroundColor, footer }: QrCodeDisplayProps) {
-  const qrCodeRef = useRef<HTMLDivElement>(null);
+export function QrCodeDisplay({
+  value,
+  primaryColor,
+  backgroundColor,
+  cornersSquareType,
+  cornersDotType,
+  footer,
+}: QrCodeDisplayProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const qrInstanceRef = useRef<QRCodeStylingInstance | null>(null);
 
   const isTransparent = backgroundColor === 'transparent';
 
   // Contrasting preview background so the QR is always visible on screen.
-  // The actual SVG keeps bgColor="transparent", so downloads have no background.
+  // The actual SVG keeps bgColor transparent, so downloads have no background.
   const previewBgColor = isTransparent
-    ? (isColorDark(primaryColor) ? '#ffffff' : '#000000')
+    ? isColorDark(primaryColor) ? '#ffffff' : '#000000'
     : backgroundColor;
 
+  const qrSize = 200;
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    if (!value) {
+      containerRef.current.innerHTML = '';
+      qrInstanceRef.current = null;
+      return;
+    }
+
+    const qrBgColor = isTransparent ? '#00000000' : backgroundColor;
+
+    const options = {
+      width: qrSize,
+      height: qrSize,
+      type: 'svg' as const,
+      data: value,
+      dotsOptions: { color: primaryColor, type: 'square' },
+      backgroundOptions: { color: qrBgColor },
+      cornersSquareOptions: { type: cornersSquareType, color: primaryColor },
+      cornersDotOptions: { type: cornersDotType, color: primaryColor },
+      qrOptions: { errorCorrectionLevel: 'H' },
+    };
+
+    import('qr-code-styling').then(({ default: QRCodeStyling }) => {
+      if (!containerRef.current) return;
+
+      if (!qrInstanceRef.current) {
+        qrInstanceRef.current = new QRCodeStyling(options) as unknown as QRCodeStylingInstance;
+        qrInstanceRef.current.append(containerRef.current);
+      } else {
+        qrInstanceRef.current.update(options as Record<string, unknown>);
+      }
+    });
+  }, [value, primaryColor, backgroundColor, isTransparent, cornersSquareType, cornersDotType]);
+
   const downloadAs = (format: 'svg' | 'png') => {
-    const svgElement = qrCodeRef.current?.querySelector('svg');
+    const svgElement = containerRef.current?.querySelector('svg');
     if (!svgElement) return;
 
     const svgString = new XMLSerializer().serializeToString(svgElement);
@@ -54,24 +106,21 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor, footer }: 
     if (format === 'svg') {
       triggerDownload(url, 'qrgen.svg');
       window.URL.revokeObjectURL(url);
-    } else if (format === 'png') {
+    } else {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d', { alpha: true });
       const img = new Image();
       img.onload = () => {
-        const out = 256;
+        const out = 512;
         canvas.width = out;
         canvas.height = out;
         ctx?.drawImage(img, 0, 0, out, out);
-        const pngUrl = canvas.toDataURL('image/png');
-        triggerDownload(pngUrl, 'qrgen.png');
+        triggerDownload(canvas.toDataURL('image/png'), 'qrgen.png');
         window.URL.revokeObjectURL(url);
       };
       img.src = url;
     }
   };
-
-  const qrSize = 200;
 
   return (
     <Card className="shadow-lg">
@@ -79,22 +128,15 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor, footer }: 
         <CardTitle className="text-lg">Your QR Code</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-2 p-3 pt-0 pb-2">
-        {value ? (
-          <div
-            ref={qrCodeRef}
-            className="p-2 rounded-lg transition-all duration-300"
-            style={{ backgroundColor: previewBgColor }}
-          >
-            <QRCode
-              value={value}
-              bgColor={backgroundColor}
-              fgColor={primaryColor}
-              size={qrSize}
-              level="H"
-              viewBox={`0 0 ${qrSize} ${qrSize}`}
-            />
-          </div>
-        ) : (
+        {/* Container is always in the DOM so the qr-code-styling instance persists */}
+        <div
+          className="p-2 rounded-lg transition-all duration-300"
+          style={{ backgroundColor: previewBgColor, display: value ? 'block' : 'none' }}
+        >
+          <div ref={containerRef} style={{ width: qrSize, height: qrSize }} />
+        </div>
+
+        {!value && (
           <div
             className="p-2 rounded-lg bg-muted flex items-center justify-center"
             style={{ width: qrSize + 16, height: qrSize + 16 }}
@@ -105,6 +147,7 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor, footer }: 
             </div>
           </div>
         )}
+
         <div className="flex w-full gap-2">
           <Button className="flex-1" onClick={() => downloadAs('png')} disabled={!value}>
             <Download className="mr-2 h-4 w-4" /> PNG
@@ -113,6 +156,7 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor, footer }: 
             <Download className="mr-2 h-4 w-4" /> SVG
           </Button>
         </div>
+
         {isTransparent && value && (
           <p className="flex items-start gap-1.5 text-xs text-muted-foreground w-full">
             <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
