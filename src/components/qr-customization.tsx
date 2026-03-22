@@ -1,5 +1,7 @@
 'use client';
 
+import { useRef } from 'react';
+import { ImagePlus, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -149,14 +151,27 @@ interface QrCustomizationProps {
     cornersSquareType?: CornerSquareType;
     cornersDotType?: CornerDotType;
     dotsType?: DotsType;
+    logoImage?: string;
   }) => void;
   currentColors: { primary: string; background: string };
   cornersSquareType: CornerSquareType;
   cornersDotType: CornerDotType;
   dotsType: DotsType;
+  logoImage: string;
 }
 
-export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType, dotsType }: QrCustomizationProps) {
+export function QrCustomization({ onChange, currentColors, cornersSquareType, cornersDotType, dotsType, logoImage }: QrCustomizationProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => onChange({ logoImage: ev.target?.result as string });
+    reader.readAsDataURL(file);
+    // Reset so the same file can be re-uploaded after removal
+    e.target.value = '';
+  };
   const isTransparent = currentColors.background === 'transparent';
 
   const selectedPresetId = CORNER_PRESETS.find(
@@ -234,6 +249,40 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
           );
         })}
       </div>
+
+      {/* Logo */}
+      <p className="text-sm font-semibold leading-none pt-1">Logo</p>
+      {logoImage ? (
+        <div className="flex items-center gap-2">
+          <div className="relative shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoImage} alt="Logo" className="h-10 w-10 rounded-md border object-contain bg-white p-0.5" />
+            <button
+              type="button"
+              onClick={() => onChange({ logoImage: '' })}
+              className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow"
+            >
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-xs text-muted-foreground transition-colors hover:border-primary/60 hover:text-primary"
+        >
+          <ImagePlus className="h-4 w-4" />
+          Upload logo (PNG, JPG, SVG)
+        </button>
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/svg+xml,image/webp"
+        className="hidden"
+        onChange={handleLogoUpload}
+      />
 
       {/* Corner styles */}
       <p className="text-sm font-semibold leading-none pt-1">Corners</p>

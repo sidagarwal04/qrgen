@@ -13,6 +13,7 @@ interface QrCodeDisplayProps {
   cornersSquareType: CornerSquareType;
   cornersDotType: CornerDotType;
   dotsType: DotsType;
+  logoImage: string;
   /** Renders below the download buttons inside the same card (e.g. color controls). */
   footer?: ReactNode;
 }
@@ -38,6 +39,7 @@ export function QrCodeDisplay({
   cornersSquareType,
   cornersDotType,
   dotsType,
+  logoImage,
   footer,
 }: QrCodeDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,15 @@ export function QrCodeDisplay({
       backgroundOptions: { color: qrBgColor },
       cornersSquareOptions: { type: cornersSquareType, color: primaryColor },
       cornersDotOptions: { type: cornersDotType, color: primaryColor },
-      qrOptions: { errorCorrectionLevel: 'M' },
+      // Raise error correction to Q when a logo covers the center modules
+      qrOptions: { errorCorrectionLevel: logoImage ? 'Q' : 'M' },
+      image: logoImage || undefined,
+      imageOptions: {
+        hideBackgroundDots: true,
+        imageSize: 0.3,
+        margin: 4,
+        crossOrigin: 'anonymous',
+      },
     };
 
     import('qr-code-styling').then(({ default: QRCodeStyling }) => {
@@ -86,7 +96,7 @@ export function QrCodeDisplay({
         qrInstanceRef.current.update(options as Record<string, unknown>);
       }
     });
-  }, [value, primaryColor, backgroundColor, isTransparent, cornersSquareType, cornersDotType, dotsType]);
+  }, [value, primaryColor, backgroundColor, isTransparent, cornersSquareType, cornersDotType, dotsType, logoImage]);
 
   const downloadAs = (format: 'svg' | 'png') => {
     const svgElement = containerRef.current?.querySelector('svg');
