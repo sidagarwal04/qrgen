@@ -248,26 +248,36 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
             <Label htmlFor="primaryColor" className="text-xs">
               Primary
             </Label>
-            <Input
-              id="primaryColor"
-              type="color"
-              value={currentColors.primary}
-              onChange={(e) => onChange({ primaryColor: e.target.value })}
-              className="h-9 cursor-pointer p-1"
-            />
+            <div className="flex items-center gap-1.5">
+              <Input
+                id="primaryColor"
+                type="color"
+                value={currentColors.primary}
+                onChange={(e) => onChange({ primaryColor: e.target.value })}
+                className="h-8 w-10 shrink-0 cursor-pointer rounded p-0.5"
+              />
+              <span className="truncate font-mono text-xs text-muted-foreground uppercase">
+                {currentColors.primary}
+              </span>
+            </div>
           </div>
           <div className="space-y-1">
             <Label htmlFor="backgroundColor" className="text-xs">
               Background
             </Label>
-            <Input
-              id="backgroundColor"
-              type="color"
-              value={isTransparent ? '#ffffff' : currentColors.background}
-              onChange={(e) => onChange({ backgroundColor: e.target.value })}
-              className="h-9 cursor-pointer p-1"
-              disabled={isTransparent}
-            />
+            <div className="flex items-center gap-1.5">
+              <Input
+                id="backgroundColor"
+                type="color"
+                value={isTransparent ? '#ffffff' : currentColors.background}
+                onChange={(e) => onChange({ backgroundColor: e.target.value })}
+                className="h-8 w-10 shrink-0 cursor-pointer rounded p-0.5"
+                disabled={isTransparent}
+              />
+              <span className="truncate font-mono text-xs text-muted-foreground uppercase">
+                {isTransparent ? 'none' : currentColors.background}
+              </span>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -275,6 +285,7 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
             id="transparent-bg"
             checked={isTransparent}
             onCheckedChange={handleTransparentToggle}
+            className="h-4 w-8 [&>span]:h-3 [&>span]:w-3 [&>span]:data-[state=checked]:translate-x-4"
           />
           <Label htmlFor="transparent-bg" className="text-xs font-medium cursor-pointer">
             Transparent background

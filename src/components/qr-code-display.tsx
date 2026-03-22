@@ -235,7 +235,7 @@ export function QrCodeDisplay({
     ? (isColorDark(primaryColor) ? '#ffffff' : '#000000')
     : backgroundColor;
 
-  const qrSize = 200;
+  const qrSize = 172;
   const hasFrame = frameType !== 'none';
   const hasBanner = frameType === 'banner-bottom';
   const hasLabelBottom = frameType === 'label-bottom';
