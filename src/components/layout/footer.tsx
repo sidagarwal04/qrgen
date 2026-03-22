@@ -2,8 +2,8 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="py-6 px-6 text-center text-sm text-muted-foreground">
-      <div className="flex flex-col items-center gap-1">
+    <footer className="shrink-0 py-2 px-3 text-center text-xs text-muted-foreground md:text-sm">
+      <div className="flex flex-col items-center gap-0.5">
         <p>
           Built with ❤️ by{' '}
           <a

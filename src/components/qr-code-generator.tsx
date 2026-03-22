@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -103,7 +102,7 @@ export function QrCodeGenerator() {
 
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
             control={form.control}
             name="url"
@@ -137,7 +136,7 @@ export function QrCodeGenerator() {
 
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
             control={form.control}
             name="text"
@@ -172,7 +171,7 @@ export function QrCodeGenerator() {
 
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-2 sm:gap-3">
           <FormField
             control={form.control}
             name="ssid"
@@ -221,7 +220,7 @@ export function QrCodeGenerator() {
               </FormItem>
             )}
           />
-          <div className="sm:col-span-2 pt-2">
+          <div className="sm:col-span-2 pt-1">
             <Button type="submit" className="w-full">Generate QR Code</Button>
           </div>
         </form>
@@ -253,14 +252,14 @@ END:VCARD`;
 
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-2 sm:gap-3">
           <FormField control={form.control} name="firstName" render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="lastName" render={({ field }) => (<FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="organization" render={({ field }) => (<FormItem><FormLabel>Organization</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="website" render={({ field }) => (<FormItem><FormLabel>Website</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem>)} />
-          <div className="sm:col-span-2 pt-2">
+          <div className="sm:col-span-2 pt-1">
              <Button type="submit" className="w-full">Generate QR Code</Button>
           </div>
         </form>
@@ -283,7 +282,7 @@ END:VCARD`;
     
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
             control={form.control}
             name="phone"
@@ -333,7 +332,7 @@ END:VCARD`;
 
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
             control={form.control}
             name="email"
@@ -392,7 +391,7 @@ END:VCARD`;
 
     return (
         <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
                 control={form.control}
                 name="phone"
@@ -446,27 +445,26 @@ END:VCARD`;
   ];
 
   return (
-    <div className="container mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="container mx-auto max-w-6xl px-0">
+        <div className="grid grid-cols-1 gap-3 md:gap-4 lg:grid-cols-3 lg:gap-5">
             <div className="lg:col-span-2">
                 <Tabs value={qrType} onValueChange={(value) => setQrType(value as QrType)} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-7 mb-4 h-auto">
+                    <TabsList className="mb-2 grid h-auto w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-7 p-0.5">
                         {qrTypesConfig.map(config => (
-                            <TabsTrigger key={config.value} value={config.value} className="flex flex-col sm:flex-row gap-2 h-auto py-2">
-                                <config.icon className="h-5 w-5" />
+                            <TabsTrigger key={config.value} value={config.value} className="flex h-auto flex-col gap-1 py-1.5 text-xs sm:flex-row sm:gap-1.5 sm:text-sm">
+                                <config.icon className="h-4 w-4 shrink-0 sm:h-4 sm:w-4" />
                                 {config.label}
                             </TabsTrigger>
                         ))}
                     </TabsList>
 
                     {qrTypesConfig.map(config => (
-                        <TabsContent key={config.value} value={config.value}>
+                        <TabsContent key={config.value} value={config.value} className="mt-1">
                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Enter {config.label} Details</CardTitle>
-                                    <CardDescription>Fill in the information to generate your QR code.</CardDescription>
+                                <CardHeader className="space-y-0 p-3 pb-2">
+                                    <CardTitle className="text-lg">Enter {config.label} Details</CardTitle>
                                 </CardHeader>
-                                <CardContent>
+                                <CardContent className="p-3 pt-0">
                                     {formComponents[config.value as QrType]}
                                 </CardContent>
                             </Card>
@@ -474,10 +472,21 @@ END:VCARD`;
                     ))}
                 </Tabs>
             </div>
-            <div className="lg:col-span-1">
-              <div className="lg:sticky lg:top-24 space-y-8">
-                <QrCodeDisplay value={qrValue} {...customization} />
-                <QrCustomization onChange={handleCustomizationChange} currentColors={{primary: customization.primaryColor, background: customization.backgroundColor}} />
+            <div className="lg:col-span-1 lg:self-start">
+              <div className="lg:sticky lg:top-14">
+                <QrCodeDisplay
+                  value={qrValue}
+                  {...customization}
+                  footer={
+                    <QrCustomization
+                      onChange={handleCustomizationChange}
+                      currentColors={{
+                        primary: customization.primaryColor,
+                        background: customization.backgroundColor,
+                      }}
+                    />
+                  }
+                />
               </div>
             </div>
         </div>

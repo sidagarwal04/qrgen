@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,11 @@ interface QrCodeDisplayProps {
   value: string;
   primaryColor: string;
   backgroundColor: string;
+  /** Renders below the download buttons inside the same card (e.g. color controls). */
+  footer?: ReactNode;
 }
 
-export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDisplayProps) {
+export function QrCodeDisplay({ value, primaryColor, backgroundColor, footer }: QrCodeDisplayProps) {
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
   const downloadAs = (format: 'svg' | 'png') => {
@@ -40,9 +42,10 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDi
         const ctx = canvas.getContext('2d');
         const img = new Image();
         img.onload = () => {
-            canvas.width = 256;
-            canvas.height = 256;
-            ctx?.drawImage(img, 0, 0, 256, 256);
+            const out = 256;
+            canvas.width = out;
+            canvas.height = out;
+            ctx?.drawImage(img, 0, 0, out, out);
             const pngUrl = canvas.toDataURL('image/png');
             triggerDownload(pngUrl, 'qrgen.png');
         };
@@ -51,36 +54,41 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDi
   };
 
 
+  const qrSize = 200;
+
   return (
     <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle>Your QR Code</CardTitle>
+      <CardHeader className="space-y-0 p-3 pb-1.5">
+        <CardTitle className="text-lg">Your QR Code</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center gap-6">
+      <CardContent className="flex flex-col items-center gap-2 p-3 pt-0 pb-2">
         {value ? (
           <div
             ref={qrCodeRef}
-            className="p-4 rounded-lg transition-all duration-300"
+            className="p-2 rounded-lg transition-all duration-300"
             style={{ backgroundColor }}
           >
             <QRCode
               value={value}
               bgColor={backgroundColor}
               fgColor={primaryColor}
-              size={256}
+              size={qrSize}
               level="H"
-              viewBox={`0 0 256 256`}
+              viewBox={`0 0 ${qrSize} ${qrSize}`}
             />
           </div>
         ) : (
-          <div className="p-4 rounded-lg bg-muted flex items-center justify-center w-[288px] h-[288px]">
-            <div className="text-center text-muted-foreground">
-                <QrCode className="h-16 w-16 mx-auto mb-4" /> 
+          <div
+            className="p-2 rounded-lg bg-muted flex items-center justify-center"
+            style={{ width: qrSize + 16, height: qrSize + 16 }}
+          >
+            <div className="text-center text-muted-foreground text-sm">
+                <QrCode className="h-12 w-12 mx-auto mb-2" /> 
                 <p>Your QR code will appear here</p>
             </div>
           </div>
         )}
-        <div className="flex gap-2 w-full">
+        <div className="flex w-full gap-2">
           <Button className="flex-1" onClick={() => downloadAs('png')} disabled={!value}>
             <Download className="mr-2 h-4 w-4" /> PNG
           </Button>
@@ -89,6 +97,9 @@ export function QrCodeDisplay({ value, primaryColor, backgroundColor }: QrCodeDi
           </Button>
         </div>
       </CardContent>
+      {footer ? (
+        <div className="border-t border-border px-3 py-2">{footer}</div>
+      ) : null}
     </Card>
   );
 }
