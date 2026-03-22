@@ -264,7 +264,7 @@ export function QrCodeDisplay({
       backgroundOptions: { color: qrBgColor },
       cornersSquareOptions: { type: cornersSquareType, color: primaryColor },
       cornersDotOptions: { type: cornersDotType, color: primaryColor },
-      qrOptions: { errorCorrectionLevel: logoImage ? 'Q' : 'M' },
+      qrOptions: { errorCorrectionLevel: (logoImage ? 'Q' : 'M') as 'L' | 'M' | 'Q' | 'H' },
       image: logoImage || undefined,
       imageOptions: { hideBackgroundDots: true, imageSize: 0.3, margin: 4, crossOrigin: 'anonymous' },
     };
