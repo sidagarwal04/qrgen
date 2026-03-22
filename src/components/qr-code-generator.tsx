@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link, FileText, Wifi, Contact, Mail, MessageSquare, ImagePlus, X, RotateCcw } from 'lucide-react';
+import { Link, FileText, Wifi, Contact, Mail, MessageSquare, MessageCircle, ImagePlus, X, RotateCcw } from 'lucide-react';
 import type { CornerSquareType, CornerDotType, DotsType, FrameType } from './qr-customization';
 
 import { Button } from '@/components/ui/button';
@@ -462,7 +462,7 @@ END:VCARD`;
     { value: 'vcard', label: 'vCard', icon: Contact },
     { value: 'whatsapp', label: 'WhatsApp', icon: MessageSquare },
     { value: 'email', label: 'Email', icon: Mail },
-    { value: 'sms', label: 'SMS', icon: MessageSquare },
+    { value: 'sms', label: 'SMS', icon: MessageCircle },
   ];
 
   return (

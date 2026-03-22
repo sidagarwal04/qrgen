@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef, useEffect, type ReactNode } from 'react';
+import { useRef, useEffect, useState, type ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, QrCode, Info } from 'lucide-react';
+import { Download, QrCode, Info, Copy, Check } from 'lucide-react';
 import type { CornerSquareType, CornerDotType, DotsType, FrameType } from './qr-customization';
 
 interface QrCodeDisplayProps {
@@ -228,6 +228,7 @@ export function QrCodeDisplay({
 }: QrCodeDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const qrInstanceRef = useRef<QRCodeStylingInstance | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const isTransparent = backgroundColor === 'transparent';
   const previewBgColor = isTransparent
@@ -313,6 +314,40 @@ export function QrCodeDisplay({
     }
   };
 
+  const copyToClipboard = () => {
+    const svgElement = containerRef.current?.querySelector('svg');
+    if (!svgElement) return;
+
+    const qrSvgString = new XMLSerializer().serializeToString(svgElement);
+    const qrBgColor = isTransparent ? '#00000000' : backgroundColor;
+    const svgUrl = URL.createObjectURL(new Blob([qrSvgString], { type: 'image/svg+xml' }));
+    const img = new Image();
+    img.onload = () => {
+      const out = 512;
+      const canvas = frameType === 'none'
+        ? (() => {
+            const c = document.createElement('canvas');
+            c.width = out; c.height = out;
+            c.getContext('2d', { alpha: true })?.drawImage(img, 0, 0, out, out);
+            return c;
+          })()
+        : buildFramedCanvas(img, frameType, frameLabel, out, primaryColor, qrBgColor, isTransparent);
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch {
+          // Clipboard API unavailable (non-HTTPS or blocked by browser)
+        }
+      }, 'image/png');
+      URL.revokeObjectURL(svgUrl);
+    };
+    img.src = svgUrl;
+  };
+
   return (
     <Card className="shadow-lg">
       <CardHeader className="space-y-0 px-3 pt-2 pb-1">
@@ -385,6 +420,12 @@ export function QrCodeDisplay({
           </Button>
           <Button className="flex-1" variant="outline" onClick={() => downloadAs('svg')} disabled={!value}>
             <Download className="mr-2 h-4 w-4" /> SVG
+          </Button>
+          <Button className="flex-1" variant="outline" onClick={copyToClipboard} disabled={!value}>
+            {copied
+              ? <><Check className="mr-2 h-4 w-4" /> Copied!</>
+              : <><Copy className="mr-2 h-4 w-4" /> Copy</>
+            }
           </Button>
         </div>
 

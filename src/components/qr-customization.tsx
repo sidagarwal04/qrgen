@@ -2,7 +2,9 @@
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export type CornerSquareType = 'square' | 'extra-rounded' | 'dot';
@@ -237,135 +239,158 @@ export function QrCustomization({ onChange, currentColors, cornersSquareType, co
   };
 
   return (
-    <div className="space-y-2">
-      {/* Colors */}
-      <p className="text-sm font-semibold leading-none">Colors</p>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="space-y-1">
-          <Label htmlFor="primaryColor" className="text-xs">
-            Primary
-          </Label>
-          <Input
-            id="primaryColor"
-            type="color"
-            value={currentColors.primary}
-            onChange={(e) => onChange({ primaryColor: e.target.value })}
-            className="h-9 cursor-pointer p-1"
-          />
+    <TooltipProvider delayDuration={300}>
+      <div className="space-y-2">
+        {/* Colors */}
+        <p className="text-sm font-semibold leading-none">Colors</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <Label htmlFor="primaryColor" className="text-xs">
+              Primary
+            </Label>
+            <Input
+              id="primaryColor"
+              type="color"
+              value={currentColors.primary}
+              onChange={(e) => onChange({ primaryColor: e.target.value })}
+              className="h-9 cursor-pointer p-1"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="backgroundColor" className="text-xs">
+              Background
+            </Label>
+            <Input
+              id="backgroundColor"
+              type="color"
+              value={isTransparent ? '#ffffff' : currentColors.background}
+              onChange={(e) => onChange({ backgroundColor: e.target.value })}
+              className="h-9 cursor-pointer p-1"
+              disabled={isTransparent}
+            />
+          </div>
         </div>
-        <div className="space-y-1">
-          <Label htmlFor="backgroundColor" className="text-xs">
-            Background
-          </Label>
-          <Input
-            id="backgroundColor"
-            type="color"
-            value={isTransparent ? '#ffffff' : currentColors.background}
-            onChange={(e) => onChange({ backgroundColor: e.target.value })}
-            className="h-9 cursor-pointer p-1"
-            disabled={isTransparent}
+        <div className="flex items-center gap-2">
+          <Switch
+            id="transparent-bg"
+            checked={isTransparent}
+            onCheckedChange={handleTransparentToggle}
           />
+          <Label htmlFor="transparent-bg" className="text-xs font-medium cursor-pointer">
+            Transparent background
+          </Label>
+        </div>
+
+        <Separator />
+
+        {/* Pattern (dot) styles */}
+        <p className="text-sm font-semibold leading-none">Patterns</p>
+        <div className="grid grid-cols-6 gap-1.5">
+          {PATTERN_PRESETS.map((preset) => {
+            const isSelected = preset.id === dotsType;
+            return (
+              <Tooltip key={preset.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => onChange({ dotsType: preset.id })}
+                    className={cn(
+                      'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
+                      'hover:border-primary/60 hover:bg-primary/5',
+                      isSelected
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-background text-foreground',
+                    )}
+                    style={{ aspectRatio: '1' }}
+                  >
+                    <PatternIcon type={preset.id} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{preset.label}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+
+        <Separator />
+
+        {/* Frame */}
+        <p className="text-sm font-semibold leading-none">Frame</p>
+        <div className="grid grid-cols-6 gap-1.5">
+          {FRAME_PRESETS.map((preset) => {
+            const isSelected = preset.id === frameType;
+            return (
+              <Tooltip key={preset.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => onChange({ frameType: preset.id })}
+                    className={cn(
+                      'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
+                      'hover:border-primary/60 hover:bg-primary/5',
+                      isSelected
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-background text-foreground',
+                    )}
+                    style={{ aspectRatio: '1' }}
+                  >
+                    <FrameIcon type={preset.id} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{preset.label}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+        {frameType !== 'none' && frameType !== 'simple' && (
+          <Input
+            value={frameLabel}
+            onChange={(e) => onChange({ frameLabel: e.target.value })}
+            placeholder="SCAN ME"
+            maxLength={24}
+            className="h-8 text-xs tracking-widest uppercase"
+          />
+        )}
+
+        <Separator />
+
+        {/* Corner styles */}
+        <p className="text-sm font-semibold leading-none">Corners</p>
+        <div className="grid grid-cols-6 gap-1.5">
+          {CORNER_PRESETS.map((preset) => {
+            const isSelected = preset.id === selectedPresetId;
+            return (
+              <Tooltip key={preset.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onChange({ cornersSquareType: preset.cornersSquare, cornersDotType: preset.cornersDot })
+                    }
+                    className={cn(
+                      'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
+                      'hover:border-primary/60 hover:bg-primary/5',
+                      isSelected
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-background text-foreground',
+                    )}
+                    style={{ aspectRatio: '1' }}
+                  >
+                    <CornerIcon cornersSquare={preset.cornersSquare} cornersDot={preset.cornersDot} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{preset.label}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Switch
-          id="transparent-bg"
-          checked={isTransparent}
-          onCheckedChange={handleTransparentToggle}
-        />
-        <Label htmlFor="transparent-bg" className="text-xs font-medium cursor-pointer">
-          Transparent background
-        </Label>
-      </div>
-
-      {/* Pattern (dot) styles */}
-      <p className="text-sm font-semibold leading-none pt-1">Patterns</p>
-      <div className="grid grid-cols-6 gap-1.5">
-        {PATTERN_PRESETS.map((preset) => {
-          const isSelected = preset.id === dotsType;
-          return (
-            <button
-              key={preset.id}
-              type="button"
-              title={preset.label}
-              onClick={() => onChange({ dotsType: preset.id })}
-              className={cn(
-                'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
-                'hover:border-primary/60 hover:bg-primary/5',
-                isSelected
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-background text-foreground',
-              )}
-              style={{ aspectRatio: '1' }}
-            >
-              <PatternIcon type={preset.id} />
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Frame */}
-      <p className="text-sm font-semibold leading-none pt-1">Frame</p>
-      <div className="grid grid-cols-6 gap-1.5">
-        {FRAME_PRESETS.map((preset) => {
-          const isSelected = preset.id === frameType;
-          return (
-            <button
-              key={preset.id}
-              type="button"
-              title={preset.label}
-              onClick={() => onChange({ frameType: preset.id })}
-              className={cn(
-                'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
-                'hover:border-primary/60 hover:bg-primary/5',
-                isSelected
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-background text-foreground',
-              )}
-              style={{ aspectRatio: '1' }}
-            >
-              <FrameIcon type={preset.id} />
-            </button>
-          );
-        })}
-      </div>
-      {frameType !== 'none' && frameType !== 'simple' && (
-        <Input
-          value={frameLabel}
-          onChange={(e) => onChange({ frameLabel: e.target.value })}
-          placeholder="SCAN ME"
-          maxLength={24}
-          className="h-8 text-xs tracking-widest uppercase"
-        />
-      )}
-
-      {/* Corner styles */}
-      <p className="text-sm font-semibold leading-none pt-1">Corners</p>
-      <div className="grid grid-cols-6 gap-1.5">
-        {CORNER_PRESETS.map((preset) => {
-          const isSelected = preset.id === selectedPresetId;
-          return (
-            <button
-              key={preset.id}
-              type="button"
-              title={preset.label}
-              onClick={() =>
-                onChange({ cornersSquareType: preset.cornersSquare, cornersDotType: preset.cornersDot })
-              }
-              className={cn(
-                'flex items-center justify-center rounded-lg border-2 p-1.5 transition-colors',
-                'hover:border-primary/60 hover:bg-primary/5',
-                isSelected
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-background text-foreground',
-              )}
-              style={{ aspectRatio: '1' }}
-            >
-              <CornerIcon cornersSquare={preset.cornersSquare} cornersDot={preset.cornersDot} />
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    </TooltipProvider>
   );
 }
